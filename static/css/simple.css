@@ -1,0 +1,63 @@
+body {
+    background: #f3f6fb;
+    min-height: 100vh;
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+.center-box {
+    background: #fff;
+    max-width: 400px;
+    margin: 60px auto;
+    padding: 32px 28px 20px 28px;
+    border-radius: 16px;
+    box-shadow: 0 4px 28px rgba(45,85,208,0.08);
+    text-align: center;
+}
+.form-label {
+    text-align: left;
+    width: 100%;
+    margin-top: 12px;
+}
+.form-control {
+    border-radius: 26px !important;
+    font-size: 1.1em;
+    padding: 10px 20px;
+}
+.btn-main {
+    background: #3265d8;
+    color: #fff;
+    border: none;
+    border-radius: 25px;
+    padding: 11px 0;
+    font-weight: 600;
+    width: 100%;
+    font-size: 1.08em;
+    margin-top: 14px;
+    margin-bottom: 8px;
+}
+.btn-main:hover {
+    background: #224caf;
+}
+.login-link,
+.register-link {
+    color: #285ac7;
+    font-size: 1em;
+    text-decoration: none;
+}
+.login-link:hover,
+.register-link:hover {
+    text-decoration: underline;
+    color: #173873;
+}
+.icon-big {
+    margin-bottom: 10px;
+    width: 48px;
+    height: 48px;
+    color: #3265d8;
+}
+h2 {
+    font-weight: 700;
+    font-size: 1.55em;
+    margin-bottom: 16px;
+    letter-spacing: -1px;
+}

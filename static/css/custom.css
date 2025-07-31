@@ -1,0 +1,60 @@
+body {
+  background: #f8f9fa;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  color: #212529;
+  margin: 0;
+  padding: 2rem;
+}
+
+.center-box {
+  max-width: 400px;
+  margin: 4rem auto;
+  background: white;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 20px rgb(0 0 0 / 0.1);
+  text-align: center;
+}
+
+.form-label {
+  font-weight: 600;
+  margin-top: 1rem;
+  text-align: left;
+}
+
+.form-control, .form-select {
+  border-radius: 30px;
+  padding: 0.5rem 1.5rem;
+  font-size: 1rem;
+}
+
+.btn-main {
+  background-color: #3467db;
+  color: white;
+  border-radius: 30px;
+  padding: 0.75rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  width: 100%;
+  margin-top: 1.5rem;
+  cursor: pointer;
+}
+
+.btn-main:hover {
+  background-color: #254ea1;
+}
+
+/* Tables */
+
+table {
+  background: white;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+/* Other spacing */
+
+h2, h4 {
+  font-weight: 700;
+  margin-bottom: 1rem;
+}

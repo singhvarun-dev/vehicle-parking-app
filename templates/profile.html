@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Profile | ParkRight</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+</head>
+<body>
+<div class="container my-5" style="max-width: 400px;">
+  <h2>User Profile</h2>
+  <form method="POST">
+    <label class="form-label">Username</label>
+    <input name="username" class="form-control" value="{{ user.username }}" required/>
+    <label class="form-label mt-3">New Password (leave blank to keep current)</label>
+    <input name="password" type="password" class="form-control"/>
+    <button type="submit" class="btn btn-primary mt-4 w-100">Update Profile</button>
+  </form>
+  <a href="{{ url_for('user_dashboard') }}" class="btn btn-link mt-3">Back to Dashboard</a>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for c, m in messages %}
+      <div class="alert alert-{{ c }} mt-2">{{ m }}</div>
+    {% endfor %}
+  {% endwith %}
+</div>
+</body>
+</html>

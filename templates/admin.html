@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Dashboard — ParkRight</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Your custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}" />
+</head>
+<body class="container py-4">
+  
+  <h2>Admin Dashboard</h2>
+  
+  <!-- Add Parking Lot Form -->
+  <form method="post" action="{{ url_for('add_lot') }}" class="row g-3 mb-4">
+    <div class="col-md-3">
+      <input type="text" name="name" class="form-control" placeholder="Lot Name" required />
+    </div>
+    <div class="col-md-2">
+      <input type="text" name="location" class="form-control" placeholder="Location" required />
+    </div>
+    <div class="col-md-2">
+      <input type="number" name="total_slots" class="form-control" placeholder="No. of Spots" min="1" required />
+    </div>
+    <div class="col-md-2">
+      <input type="number" name="price" class="form-control" placeholder="Price (₹/hour)" min="0" step="0.01" required />
+    </div>
+    <div class="col-md-3">
+      <input type="text" name="address" class="form-control" placeholder="Address" />
+    </div>
+    <div class="col-md-2">
+      <input type="text" name="pincode" class="form-control" placeholder="Pincode" />
+    </div>
+    <div class="col-md-3">
+      <select name="vehicle_type" class="form-select" required>
+        <option value="4-wheeler">4 Wheeler</option>
+        <option value="2-wheeler">2 Wheeler</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-success w-100">Add Lot</button>
+    </div>
+  </form>
+  
+  <!-- Filtering and Sorting -->
+  <form method="get" class="row g-3 mb-3">
+    <div class="col-md-3">
+      <input type="text" name="location" value="{{ request.args.get('location', '') }}" placeholder="Filter by Location" class="form-control" />
+    </div>
+    <div class="col-md-3">
+      <input type="text" name="spot_num" value="{{ request.args.get('spot_num', '') }}" placeholder="Search Spot Number" class="form-control" />
+    </div>
+    <div class="col-md-3">
+      <select name="sort" class="form-select">
+        <option value="name" {% if request.args.get('sort') == 'name' %}selected{% endif %}>Sort by Name</option>
+        <option value="price" {% if request.args.get('sort') == 'price' %}selected{% endif %}>Sort by Price</option>
+        <option value="spots_available" {% if request.args.get('sort') == 'spots_available' %}selected{% endif %}>Sort by Free Spots</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+    </div>
+  </form>
+  
+  <!-- Parking Lots Table -->
+  <h4>Parking Lots</h4>
+  <table class="table table-striped table-bordered align-middle">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Location</th>
+        <th>Address</th>
+        <th>Pincode</th>
+        <th>Price (₹/hr)</th>
+        <th>Total Slots</th>
+        <th>Available Slots</th>
+        <th>Vehicle Type</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for lot in lots %}
+      <tr>
+        <td>{{ lot.name }}</td>
+        <td>{{ lot.location }}</td>
+        <td>{{ lot.address or '' }}</td>
+        <td>{{ lot.pincode or '' }}</td>
+        <td>{{ "%.2f"|format(lot.price) }}</td>
+        <td>{{ lot.total_slots }}</td>
+        <td>{{ lot.spots|selectattr('status', 'equalto', 'Available')|list|length }}</td>
+        <td>{% if lot.spots %}{{ lot.spots[0].vehicle_type }}{% else %}-{% endif %}</td>
+        <td>
+          <a href="{{ url_for('edit_lot', lot_id=lot.id) }}" class="btn btn-warning btn-sm">Edit</a>
+          <form method="post" action="{{ url_for('delete_lot', lot_id=lot.id) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this lot?');">
+            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+          </form>
+          <a href="{{ url_for('submit_feedback', lot_id=lot.id) }}" class="btn btn-secondary btn-sm">Feedback</a>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="9" class="text-center">No parking lots found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  
+  <!-- Registered Users -->
+  <h4>Registered Users</h4>
+  <ul class="list-group mb-4">
+    {% for user in users %}
+      <li class="list-group-item">{{ user.username }} ({{ user.email }})</li>
+    {% else %}
+      <li class="list-group-item">No registered users found.</li>
+    {% endfor %}
+  </ul>
+  
+  <!-- Reservations Overview -->
+  <h4>Reservations</h4>
+  <table class="table table-sm table-bordered">
+    <thead>
+      <tr>
+        <th>User</th>
+        <th>Lot</th>
+        <th>Spot</th>
+        <th>Start Time</th>
+        <th>End Time</th>
+        <th>Status</th>
+        <th>Cost (₹)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for res in reservations %}
+      <tr>
+        <td>{{ res.user.username if res.user else '' }}</td>
+        <td>{{ res.spot.lot.name if res.spot else '' }}</td>
+        <td>{{ res.spot.slot_number if res.spot else '' }}</td>
+        <td>{{ res.start_time.strftime("%Y-%m-%d %H:%M") }}</td>
+        <td>{{ res.end_time.strftime("%Y-%m-%d %H:%M") if res.end_time else '-' }}</td>
+        <td>{{ 'Active' if res.is_active else 'Released' }}</td>
+        <td>{{ "%.2f"|format(res.total_cost) }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="7" class="text-center">No reservations found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  
+  <!-- Parking Spots Status -->
+  <h4>Parking Spots Status</h4>
+  <table class="table table-bordered table-sm">
+    <thead>
+      <tr>
+        <th>Lot</th>
+        <th>Spot Number</th>
+        <th>Status</th>
+        <th>Occupied By</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for lot in lots %}
+        {% for spot in lot.filtered_spots %}
+        <tr>
+          <td>{{ lot.name }}</td>
+          <td>{{ spot.slot_number }}</td>
+          <td>{{ spot.status }}</td>
+          <td>
+            {% if spot.status=='Occupied' %}
+              {% set active_res = spot.reservations|selectattr('is_active', 'equalto', true)|list %}
+              {{ active_res[0].user.username if active_res else 'Unknown' }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      {% endfor %}
+    </tbody>
+  </table>
+  
+  <!-- Chart container -->
+  <h4>Parking Utilization</h4>
+  <canvas id="lotChart" height="140"></canvas>
+  
+  <script>
+  fetch("{{ url_for('admin_chart_data') }}")
+  .then(response => response.json())
+  .then(data => {
+    const ctx = document.getElementById('lotChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: data.labels,
+        datasets: [
+          {
+            label: 'Total Spots',
+            data: data.total_spots,
+            backgroundColor: 'rgba(54, 162, 235, 0.5)'
+          },
+          {
+            label: 'Occupied Spots',
+            data: data.occupied_spots,
+            backgroundColor: 'rgba(255, 99, 132, 0.5)'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  });
+  </script>
+  
+  <a href="{{ url_for('logout') }}" class="btn btn-danger mt-4">Logout</a>
+  
+</body>
+</html>
