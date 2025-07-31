@@ -3,3 +3,4 @@ flask_sqlalchemy
 werkzeug
 qrcode
 Pillow
+gunicorn
